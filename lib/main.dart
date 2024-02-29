@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test_app/view/grid_view_page.dart';
 import 'package:test_app/view/responseive_page.dart';
-import 'package:test_app/view/tab_view_page.dart';
 
 void main() {
   runApp(const MyApp());
