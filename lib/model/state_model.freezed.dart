@@ -14,12 +14,17 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
+LocationData _$LocationDataFromJson(Map<String, dynamic> json) {
+  return _LocationData.fromJson(json);
+}
+
 /// @nodoc
 mixin _$LocationData {
   double get lat => throw _privateConstructorUsedError;
   double get lon => throw _privateConstructorUsedError;
   double get speed => throw _privateConstructorUsedError;
 
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $LocationDataCopyWith<LocationData> get copyWith =>
       throw _privateConstructorUsedError;
@@ -112,10 +117,13 @@ class __$$LocationDataImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$LocationDataImpl implements _LocationData {
   _$LocationDataImpl(
       {required this.lat, required this.lon, required this.speed});
+
+  factory _$LocationDataImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LocationDataImplFromJson(json);
 
   @override
   final double lat;
@@ -139,6 +147,7 @@ class _$LocationDataImpl implements _LocationData {
             (identical(other.speed, speed) || other.speed == speed));
   }
 
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, lat, lon, speed);
 
@@ -147,6 +156,13 @@ class _$LocationDataImpl implements _LocationData {
   @pragma('vm:prefer-inline')
   _$$LocationDataImplCopyWith<_$LocationDataImpl> get copyWith =>
       __$$LocationDataImplCopyWithImpl<_$LocationDataImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LocationDataImplToJson(
+      this,
+    );
+  }
 }
 
 abstract class _LocationData implements LocationData {
@@ -154,6 +170,9 @@ abstract class _LocationData implements LocationData {
       {required final double lat,
       required final double lon,
       required final double speed}) = _$LocationDataImpl;
+
+  factory _LocationData.fromJson(Map<String, dynamic> json) =
+      _$LocationDataImpl.fromJson;
 
   @override
   double get lat;

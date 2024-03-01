@@ -1,10 +1,15 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:test_app/controller/controller.dart';
+import 'package:test_app/controller/home_state_provider.dart';
+import 'package:test_app/view/widgets/action_button_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 44, 43, 43),
@@ -28,99 +33,118 @@ class HomePage extends StatelessWidget {
                   const SizedBox(
                     height: 8,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(8)),
-                        child: const Center(
-                            child: Text(
-                          'Request Location Permission',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15),
-                        )),
-                      ),
-                    ),
+                  ActionButtonWidget(
+                    text: 'Request Location Permission',
+                    color: Colors.blue,
+                    onTap: () async {
+                      /// Check if location service is enabled
+                      if (await isLocationEnabled()) {
+                        /// Check if the app has permission
+                        if (await requestLocationPermission()) {
+                          // ignore: avoid_print
+                          print('Location permission granted');
+                        } else {
+                          // ignore: avoid_print
+                          print('Location permission denied');
+                        }
+                      } else {
+                        // ignore: avoid_print
+                        print('Location not enabled');
+                      }
+                    },
+                    textcolor: Colors.white,
                   ),
                   const SizedBox(
                     height: 16,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 238, 210, 55),
-                            borderRadius: BorderRadius.circular(8)),
-                        child: const Center(
-                            child: Text(
-                          'Request Notification Permission',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15),
-                        )),
-                      ),
-                    ),
-                  ),
+                  ActionButtonWidget(
+                      text: 'Request Notification Permission',
+                      color: const Color.fromARGB(255, 238, 210, 55),
+                      onTap: () {
+                        // ignore: avoid_print
+                        print("Request Notification Permission");
+                        AwesomeNotifications()
+                            .requestPermissionToSendNotifications();
+                      },
+                      textcolor: Colors.black),
                   const SizedBox(
                     height: 16,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(8)),
-                        child: const Center(
-                            child: Text(
-                          'Start Location Upadate',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15),
-                        )),
-                      ),
-                    ),
-                  ),
+                  ActionButtonWidget(
+                      text: 'Start Location Upadate',
+                      color: Colors.green,
+                      onTap: () async {
+                        if (await requestLocationPermission()) {
+                          /// Check if the app has permission
+                          showDialog(
+                            // ignore: use_build_context_synchronously
+                            context: context,
+                            builder: ((context) {
+                              return AlertDialog(
+                                title: const Text('Alert'),
+                                content: const Text('Are you sure'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: (() {
+                                        Navigator.pop(context);
+                                      }),
+                                      child: const Text('No')),
+                                  TextButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(homeStateProvider.notifier)
+                                          .startLocationPolling();
+                                      AwesomeNotifications().createNotification(
+                                        content: NotificationContent(
+                                          id: 10,
+                                          channelKey: 'location-update',
+                                          actionType: ActionType.Default,
+                                          title: 'Location update started',
+                                        ),
+                                      );
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Yes'),
+                                  )
+                                ],
+                              );
+                            }),
+                          );
+                        } else {
+                          showDialog(
+                            // ignore: use_build_context_synchronously
+                            context: context,
+                            builder: ((context) {
+                              return const AlertDialog(
+                                title: Text('Alert'),
+                                content:
+                                    Text('Place Enable Location permission'),
+                              );
+                            }),
+                          );
+                        }
+                      },
+                      textcolor: Colors.white),
                   const SizedBox(
                     height: 16,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: InkWell(
-                      onTap: () {},
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 50,
-                        decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(8)),
-                        child: const Center(
-                            child: Text(
-                          'Stop Location Upadate',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15),
-                        )),
-                      ),
-                    ),
-                  ),
+                  ActionButtonWidget(
+                      text: 'Stop Location Upadate',
+                      color: const Color.fromRGBO(244, 67, 54, 1),
+                      onTap: () {
+                        ref
+                            .read(homeStateProvider.notifier)
+                            .stopLocationPolling();
+                        AwesomeNotifications().createNotification(
+                          content: NotificationContent(
+                            id: 11,
+                            channelKey: 'location-update',
+                            actionType: ActionType.Default,
+                            title: 'Location update stoped',
+                          ),
+                        );
+                      },
+                      textcolor: Colors.white),
                 ],
               ),
             ),
@@ -128,8 +152,9 @@ class HomePage extends StatelessWidget {
               height: 400,
               width: MediaQuery.of(context).size.width,
               child: ListView.builder(
-                itemCount: 29,
+                itemCount: ref.watch(homeStateProvider).locations.length,
                 itemBuilder: (BuildContext context, int index) {
+                  final data = ref.watch(homeStateProvider).locations[index];
                   return Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -152,43 +177,43 @@ class HomePage extends StatelessWidget {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 15),
                               ),
-                              const Row(
+                              Row(
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Lat:',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w600),
                                   ),
                                   Text(
-                                    ' 1.234',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w400),
+                                    data.lat.toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w400),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 20,
                                   ),
-                                  Text(
+                                  const Text(
                                     'Lng:',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w600),
                                   ),
                                   Text(
-                                    ' 4.321',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w400),
+                                    data.lon.toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w400),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 20,
                                   ),
-                                  Text(
-                                    'Speed:',
+                                  const Text(
+                                    'Speed: ',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w600),
                                   ),
                                   Text(
-                                    ' 45m',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w400),
+                                    '${data.speed.toStringAsFixed(0)}m',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w400),
                                   )
                                 ],
                               )
